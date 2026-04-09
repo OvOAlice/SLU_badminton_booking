@@ -422,10 +422,333 @@ function buildTimelineSummary(slots, bookings, unnamedLabel) {
     });
 }
 
+function getStyles(isMobile, isTablet) {
+  const nameColWidth = isMobile ? 72 : isTablet ? 82 : 94;
+  const timelineMinWidth = isMobile ? 520 : 0;
+
+  return {
+    page: {
+      minHeight: "100vh",
+      background: "#f5f7fb",
+      padding: isMobile ? 10 : 16,
+      fontFamily: "Arial, sans-serif",
+      color: "#1f2937",
+      boxSizing: "border-box",
+    },
+    container: {
+      maxWidth: 1320,
+      margin: "0 auto",
+      display: "grid",
+      gap: isMobile ? 10 : 14,
+    },
+    headerRow: {
+      display: "flex",
+      justifyContent: "flex-start",
+      alignItems: "center",
+    },
+    languageBox: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      background: "white",
+      borderRadius: 12,
+      padding: isMobile ? "7px 9px" : "8px 10px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+      width: "fit-content",
+      maxWidth: "100%",
+      flexWrap: "wrap",
+    },
+    languageLabel: {
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: 600,
+      color: "#374151",
+    },
+    languageSelect: {
+      border: "1px solid #d1d5db",
+      borderRadius: 8,
+      padding: isMobile ? "6px 8px" : "6px 8px",
+      fontSize: isMobile ? 12 : 13,
+      background: "white",
+      maxWidth: "100%",
+    },
+    headerBlock: {
+      marginBottom: 2,
+      textAlign: isMobile ? "center" : "left",
+    },
+    title: {
+      margin: 0,
+      fontSize: isMobile ? 24 : 30,
+      lineHeight: 1.2,
+      wordBreak: "break-word",
+    },
+    subtitle: {
+      marginTop: 4,
+      marginBottom: 0,
+      color: "#6b7280",
+      fontSize: isMobile ? 13 : 14,
+    },
+    card: {
+      background: "white",
+      borderRadius: isMobile ? 12 : 14,
+      padding: isMobile ? 12 : 16,
+      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+      overflow: "hidden",
+    },
+    sectionTitle: {
+      marginTop: 0,
+      marginBottom: 12,
+      fontSize: isMobile ? 17 : 18,
+      lineHeight: 1.3,
+    },
+    tabRow: {
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap",
+      marginBottom: 14,
+    },
+    rowWrap: {
+      display: "flex",
+      gap: 10,
+      flexWrap: "wrap",
+      alignItems: "center",
+      flexDirection: isMobile ? "column" : "row",
+    },
+    rowWrapNoStack: {
+      display: "flex",
+      gap: 10,
+      flexWrap: "wrap",
+      alignItems: "center",
+    },
+    entryPanel: {
+      display: "grid",
+      gap: 10,
+    },
+    stackedSections: {
+      display: "grid",
+      gridTemplateColumns: "1fr",
+      gap: isMobile ? 10 : 14,
+      alignItems: "start",
+    },
+    grid2: {
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      gap: 10,
+    },
+    grid3: {
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+      gap: 10,
+    },
+    grid4: {
+      display: "grid",
+      gridTemplateColumns: isMobile
+        ? "1fr"
+        : isTablet
+          ? "repeat(2, 1fr)"
+          : "repeat(4, 1fr)",
+      gap: 10,
+    },
+    inputBlock: {
+      display: "grid",
+      gap: 6,
+      minWidth: 0,
+    },
+    label: {
+      fontWeight: 600,
+      fontSize: isMobile ? 13 : 14,
+      lineHeight: 1.3,
+    },
+    input: {
+      width: "100%",
+      minWidth: 0,
+      padding: isMobile ? "10px 10px" : "9px 10px",
+      borderRadius: 10,
+      border: "1px solid #d1d5db",
+      fontSize: isMobile ? 16 : 14,
+      background: "white",
+      boxSizing: "border-box",
+    },
+    primaryButton: {
+      border: "none",
+      background: "#111827",
+      color: "white",
+      padding: isMobile ? "11px 14px" : "10px 14px",
+      borderRadius: 10,
+      cursor: "pointer",
+      fontSize: isMobile ? 14 : 14,
+      width: isMobile ? "100%" : "auto",
+      minHeight: 42,
+    },
+    secondaryButton: {
+      border: "1px solid #d1d5db",
+      background: "white",
+      color: "#111827",
+      padding: isMobile ? "11px 14px" : "10px 14px",
+      borderRadius: 10,
+      cursor: "pointer",
+      fontSize: isMobile ? 14 : 14,
+      width: isMobile ? "100%" : "auto",
+      minHeight: 42,
+    },
+    disabledButton: {
+      border: "none",
+      background: "#9ca3af",
+      color: "white",
+      padding: isMobile ? "11px 14px" : "10px 14px",
+      borderRadius: 10,
+      cursor: "not-allowed",
+      fontSize: isMobile ? 14 : 14,
+      width: isMobile ? "100%" : "auto",
+      minHeight: 42,
+    },
+    hint: {
+      marginTop: 6,
+      color: "#6b7280",
+      fontSize: isMobile ? 12 : 13,
+      lineHeight: 1.5,
+      wordBreak: "break-word",
+    },
+    message: {
+      whiteSpace: "pre-wrap",
+      background: "#eef2ff",
+      border: "1px solid #c7d2fe",
+      borderRadius: 12,
+      padding: isMobile ? 11 : 12,
+      fontSize: isMobile ? 13 : 14,
+      lineHeight: 1.5,
+      wordBreak: "break-word",
+    },
+    rangeBox: {
+      marginTop: 14,
+      marginBottom: 14,
+      padding: isMobile ? 10 : 12,
+      borderRadius: 12,
+      background: "#f9fafb",
+      border: "1px solid #e5e7eb",
+    },
+    rangeTitle: {
+      fontWeight: 700,
+      marginBottom: 4,
+      fontSize: isMobile ? 13 : 14,
+    },
+    rangeText: {
+      fontSize: isMobile ? 18 : 17,
+      fontWeight: 700,
+      lineHeight: 1.35,
+      wordBreak: "break-word",
+    },
+    adminUnlockRow: {
+      display: "flex",
+      gap: 12,
+      alignItems: "end",
+      flexWrap: "wrap",
+      flexDirection: isMobile ? "column" : "row",
+    },
+    adminButtonWrap: {
+      display: "flex",
+      alignItems: "end",
+      width: isMobile ? "100%" : "auto",
+    },
+    timelineDayList: {
+      display: "grid",
+      gap: 12,
+      maxHeight: isMobile ? "none" : 520,
+      overflowY: isMobile ? "visible" : "auto",
+    },
+    timelineDayCard: {
+      border: "1px solid #e5e7eb",
+      borderRadius: 12,
+      padding: isMobile ? 10 : 12,
+      background: "#fafafa",
+      overflowX: "auto",
+    },
+    timelineDayTitle: {
+      fontWeight: 700,
+      marginBottom: 10,
+      fontSize: isMobile ? 14 : 15,
+    },
+    timelineTable: {
+      minWidth: timelineMinWidth,
+    },
+    timelineHeader: {
+      display: "grid",
+      gridTemplateColumns: `${nameColWidth}px 1fr`,
+      gap: isMobile ? 8 : 10,
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    timelineNameColumn: {},
+    timelineAxis: {
+      display: "flex",
+      justifyContent: "space-between",
+      position: "relative",
+      fontSize: isMobile ? 10 : 11,
+      color: "#6b7280",
+    },
+    timelineTick: {
+      textAlign: "left",
+      whiteSpace: "nowrap",
+    },
+    timelineRows: {
+      display: "grid",
+      gap: 8,
+    },
+    timelineRow: {
+      display: "grid",
+      gridTemplateColumns: `${nameColWidth}px 1fr`,
+      gap: isMobile ? 8 : 10,
+      alignItems: "center",
+    },
+    timelinePersonName: {
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: 700,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      borderRadius: 999,
+      padding: isMobile ? "6px 8px" : "6px 10px",
+      boxSizing: "border-box",
+    },
+    timelineTrack: {
+      position: "relative",
+      height: isMobile ? 30 : 28,
+      borderRadius: 999,
+      background:
+        "repeating-linear-gradient(to right, #eef2f7 0, #eef2f7 calc(16.666% - 1px), #dbe3ee calc(16.666% - 1px), #dbe3ee 16.666%)",
+      overflow: "hidden",
+    },
+    timelineBar: {
+      position: "absolute",
+      top: isMobile ? 4 : 3,
+      height: isMobile ? 22 : 22,
+      borderRadius: 999,
+      color: "white",
+      fontSize: isMobile ? 10 : 11,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      padding: "0 8px",
+      boxSizing: "border-box",
+    },
+    empty: {
+      color: "#6b7280",
+      fontSize: isMobile ? 13 : 14,
+      lineHeight: 1.5,
+    },
+  };
+}
+
 export default function App() {
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("badminton_lang") || "zh";
   });
+
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  );
 
   const [slots, setSlots] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -451,12 +774,22 @@ export default function App() {
   const [adminEnd, setAdminEnd] = useState("20:00");
   const [adminCapacity, setAdminCapacity] = useState(8);
 
+  const isMobile = viewportWidth <= 768;
+  const isTablet = viewportWidth > 768 && viewportWidth <= 1024;
+  const styles = useMemo(() => getStyles(isMobile, isTablet), [isMobile, isTablet]);
+
   const dict = translations[language] || translations.zh;
   const t = (key, vars) => formatText(dict[key] || key, vars);
 
   useEffect(() => {
     localStorage.setItem("badminton_lang", language);
   }, [language]);
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -922,7 +1255,7 @@ export default function App() {
               {!adminUnlocked ? (
                 <>
                   <div style={styles.adminUnlockRow}>
-                    <div style={{ ...styles.inputBlock, flex: 1 }}>
+                    <div style={{ ...styles.inputBlock, flex: 1, width: isMobile ? "100%" : "auto" }}>
                       <label style={styles.label}>{t("adminPassword")}</label>
                       <input
                         type="password"
@@ -998,92 +1331,7 @@ export default function App() {
           )}
         </div>
 
-        <div style={styles.secondGrid}>
-          <div style={styles.card}>
-            <h2 style={styles.sectionTitle}>{t("sectionSummary")}</h2>
-
-            {loading ? (
-              <div>{t("loading")}</div>
-            ) : timelineSummary.length === 0 ? (
-              <div style={styles.empty}>{t("noBookings")}</div>
-            ) : (
-              <div style={styles.timelineDayList}>
-                {timelineSummary.map((day) => (
-                  <div key={day.date} style={styles.timelineDayCard}>
-                    <div style={styles.timelineDayTitle}>{day.date}</div>
-
-                    <div style={styles.timelineHeader}>
-                      <div style={styles.timelineNameColumn}></div>
-                      <div style={styles.timelineAxis}>
-                        {day.ticks.map((tick) => (
-                          <div
-                            key={tick}
-                            style={{
-                              ...styles.timelineTick,
-                              width: `${100 / Math.max(day.ticks.length - 1, 1)}%`,
-                            }}
-                          >
-                            {tick}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={styles.timelineRows}>
-                      {day.people.map((person) => {
-                        const userColor = getUserColor(person.name);
-
-                        return (
-                          <div key={person.name} style={styles.timelineRow}>
-                            <div
-                              style={{
-                                ...styles.timelinePersonName,
-                                color: userColor.bg,
-                                background: userColor.soft,
-                                border: `1px solid ${userColor.bg}22`,
-                              }}
-                              title={person.name}
-                            >
-                              {person.name}
-                            </div>
-
-                            <div style={styles.timelineTrack}>
-                              {person.ranges.map((range, idx) => {
-                                const startMinute = timeToMinutes(range.start);
-                                const endMinute = timeToMinutes(range.end);
-                                const left =
-                                  ((startMinute - day.minMinute) / day.totalMinutes) * 100;
-                                const width =
-                                  ((endMinute - startMinute) / day.totalMinutes) * 100;
-
-                                return (
-                                  <div
-                                    key={`${person.name}-${idx}`}
-                                    style={{
-                                      ...styles.timelineBar,
-                                      left: `${left}%`,
-                                      width: `${width}%`,
-                                      background: userColor.bg,
-                                      color: userColor.text,
-                                      boxShadow: `0 1px 4px ${userColor.bg}44`,
-                                    }}
-                                    title={`${person.name}: ${range.start}-${range.end}`}
-                                  >
-                                    {range.start}-{range.end}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
+        <div style={styles.stackedSections}>
           <div style={styles.card}>
             <h2 style={styles.sectionTitle}>{t("sectionRange")}</h2>
 
@@ -1166,6 +1414,93 @@ export default function App() {
               </>
             )}
           </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.sectionTitle}>{t("sectionSummary")}</h2>
+
+            {loading ? (
+              <div>{t("loading")}</div>
+            ) : timelineSummary.length === 0 ? (
+              <div style={styles.empty}>{t("noBookings")}</div>
+            ) : (
+              <div style={styles.timelineDayList}>
+                {timelineSummary.map((day) => (
+                  <div key={day.date} style={styles.timelineDayCard}>
+                    <div style={styles.timelineDayTitle}>{day.date}</div>
+
+                    <div style={styles.timelineTable}>
+                      <div style={styles.timelineHeader}>
+                        <div style={styles.timelineNameColumn}></div>
+                        <div style={styles.timelineAxis}>
+                          {day.ticks.map((tick) => (
+                            <div
+                              key={tick}
+                              style={{
+                                ...styles.timelineTick,
+                                width: `${100 / Math.max(day.ticks.length - 1, 1)}%`,
+                              }}
+                            >
+                              {tick}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={styles.timelineRows}>
+                        {day.people.map((person) => {
+                          const userColor = getUserColor(person.name);
+
+                          return (
+                            <div key={person.name} style={styles.timelineRow}>
+                              <div
+                                style={{
+                                  ...styles.timelinePersonName,
+                                  color: userColor.bg,
+                                  background: userColor.soft,
+                                  border: `1px solid ${userColor.bg}22`,
+                                }}
+                                title={person.name}
+                              >
+                                {person.name}
+                              </div>
+
+                              <div style={styles.timelineTrack}>
+                                {person.ranges.map((range, idx) => {
+                                  const startMinute = timeToMinutes(range.start);
+                                  const endMinute = timeToMinutes(range.end);
+                                  const left =
+                                    ((startMinute - day.minMinute) / day.totalMinutes) * 100;
+                                  const width =
+                                    ((endMinute - startMinute) / day.totalMinutes) * 100;
+
+                                  return (
+                                    <div
+                                      key={`${person.name}-${idx}`}
+                                      style={{
+                                        ...styles.timelineBar,
+                                        left: `${left}%`,
+                                        width: `${width}%`,
+                                        background: userColor.bg,
+                                        color: userColor.text,
+                                        boxShadow: `0 1px 4px ${userColor.bg}44`,
+                                      }}
+                                      title={`${person.name}: ${range.start}-${range.end}`}
+                                    >
+                                      {range.start}-{range.end}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {message && <div style={styles.message}>{message}</div>}
@@ -1173,277 +1508,3 @@ export default function App() {
     </div>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#f5f7fb",
-    padding: 16,
-    fontFamily: "Arial, sans-serif",
-    color: "#1f2937",
-  },
-  container: {
-    maxWidth: 1320,
-    margin: "0 auto",
-    display: "grid",
-    gap: 14,
-  },
-  headerRow: {
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  languageBox: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    background: "white",
-    borderRadius: 12,
-    padding: "8px 10px",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-    width: "fit-content",
-  },
-  languageLabel: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#374151",
-  },
-  languageSelect: {
-    border: "1px solid #d1d5db",
-    borderRadius: 8,
-    padding: "6px 8px",
-    fontSize: 13,
-    background: "white",
-  },
-  headerBlock: {
-    marginBottom: 2,
-  },
-  title: {
-    margin: 0,
-    fontSize: 30,
-  },
-  subtitle: {
-    marginTop: 4,
-    marginBottom: 0,
-    color: "#6b7280",
-    fontSize: 14,
-  },
-  card: {
-    background: "white",
-    borderRadius: 14,
-    padding: 16,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-  },
-  sectionTitle: {
-    marginTop: 0,
-    marginBottom: 12,
-    fontSize: 18,
-  },
-  tabRow: {
-    display: "flex",
-    gap: 10,
-    flexWrap: "wrap",
-    marginBottom: 14,
-  },
-  rowWrap: {
-    display: "flex",
-    gap: 10,
-    flexWrap: "wrap",
-    alignItems: "center",
-  },
-  entryPanel: {
-    display: "grid",
-    gap: 10,
-  },
-  secondGrid: {
-    display: "grid",
-    gridTemplateColumns: "1.15fr 1fr",
-    gap: 14,
-    alignItems: "start",
-  },
-  grid2: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 10,
-  },
-  grid3: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: 10,
-  },
-  grid4: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: 10,
-  },
-  inputBlock: {
-    display: "grid",
-    gap: 6,
-  },
-  label: {
-    fontWeight: 600,
-    fontSize: 14,
-  },
-  input: {
-    width: "100%",
-    minWidth: 0,
-    padding: "9px 10px",
-    borderRadius: 10,
-    border: "1px solid #d1d5db",
-    fontSize: 14,
-    background: "white",
-    boxSizing: "border-box",
-  },
-  primaryButton: {
-    border: "none",
-    background: "#111827",
-    color: "white",
-    padding: "10px 14px",
-    borderRadius: 10,
-    cursor: "pointer",
-    fontSize: 14,
-  },
-  secondaryButton: {
-    border: "1px solid #d1d5db",
-    background: "white",
-    color: "#111827",
-    padding: "10px 14px",
-    borderRadius: 10,
-    cursor: "pointer",
-    fontSize: 14,
-  },
-  disabledButton: {
-    border: "none",
-    background: "#9ca3af",
-    color: "white",
-    padding: "10px 14px",
-    borderRadius: 10,
-    cursor: "not-allowed",
-    fontSize: 14,
-  },
-  hint: {
-    marginTop: 6,
-    color: "#6b7280",
-    fontSize: 13,
-    lineHeight: 1.45,
-  },
-  message: {
-    whiteSpace: "pre-wrap",
-    background: "#eef2ff",
-    border: "1px solid #c7d2fe",
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 14,
-  },
-  rangeBox: {
-    marginTop: 14,
-    marginBottom: 14,
-    padding: 12,
-    borderRadius: 12,
-    background: "#f9fafb",
-    border: "1px solid #e5e7eb",
-  },
-  rangeTitle: {
-    fontWeight: 700,
-    marginBottom: 4,
-    fontSize: 14,
-  },
-  rangeText: {
-    fontSize: 17,
-    fontWeight: 700,
-  },
-  adminUnlockRow: {
-    display: "flex",
-    gap: 12,
-    alignItems: "end",
-    flexWrap: "wrap",
-  },
-  adminButtonWrap: {
-    display: "flex",
-    alignItems: "end",
-  },
-  timelineDayList: {
-    display: "grid",
-    gap: 12,
-    maxHeight: 520,
-    overflowY: "auto",
-  },
-  timelineDayCard: {
-    border: "1px solid #e5e7eb",
-    borderRadius: 12,
-    padding: 12,
-    background: "#fafafa",
-  },
-  timelineDayTitle: {
-    fontWeight: 700,
-    marginBottom: 10,
-    fontSize: 15,
-  },
-  timelineHeader: {
-    display: "grid",
-    gridTemplateColumns: "94px 1fr",
-    gap: 10,
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  timelineNameColumn: {},
-  timelineAxis: {
-    display: "flex",
-    justifyContent: "space-between",
-    position: "relative",
-    fontSize: 11,
-    color: "#6b7280",
-  },
-  timelineTick: {
-    textAlign: "left",
-    whiteSpace: "nowrap",
-  },
-  timelineRows: {
-    display: "grid",
-    gap: 8,
-  },
-  timelineRow: {
-    display: "grid",
-    gridTemplateColumns: "94px 1fr",
-    gap: 10,
-    alignItems: "center",
-  },
-  timelinePersonName: {
-    fontSize: 13,
-    fontWeight: 700,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    borderRadius: 999,
-    padding: "6px 10px",
-    boxSizing: "border-box",
-  },
-  timelineTrack: {
-    position: "relative",
-    height: 28,
-    borderRadius: 999,
-    background:
-      "repeating-linear-gradient(to right, #eef2f7 0, #eef2f7 calc(16.666% - 1px), #dbe3ee calc(16.666% - 1px), #dbe3ee 16.666%)",
-    overflow: "hidden",
-  },
-  timelineBar: {
-    position: "absolute",
-    top: 3,
-    height: 22,
-    borderRadius: 999,
-    color: "white",
-    fontSize: 11,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    padding: "0 8px",
-    boxSizing: "border-box",
-  },
-  empty: {
-    color: "#6b7280",
-    fontSize: 14,
-  },
-};
