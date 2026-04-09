@@ -249,7 +249,7 @@ const translations = {
     rangeRulePublicOk:
       "Public entry can currently book this range.",
     rangeRulePublicWait:
-      "Public entry can only book slots within the next 72 hours.",
+      "Public entry will open 72 hours prior to the start of the activity.",
 
     unnamed: "Unnamed",
   },
