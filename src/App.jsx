@@ -123,10 +123,10 @@ const translations = {
     rangeRuleInvalid: "请选择合法的开始和结束时间。结束时间必须晚于开始时间。",
     rangeRulePast: "不能报名已经开始或已经结束的时间段。",
     rangeRulePriorityVerified:
-      "WhatsApp群成员可提前报名任意未来时间段。系统会自动帮你报名 {count} 个半小时段。",
+      "WhatsApp群成员可提前报名任意未来时间段。",
     rangeRulePriorityNeed: "WhatsApp群成员需要先输入正确邀请码。",
     rangeRulePublicOk:
-      "普通入口当前可以报名这个范围。系统会自动帮你报名 {count} 个半小时段。",
+      "普通入口当前可以报名这个范围。",
     rangeRulePublicWait: "普通入口的报名仅在活动开始前72h内开放。",
 
     unnamed: "未命名",
@@ -243,11 +243,11 @@ const translations = {
     rangeRulePast:
       "You cannot book slots that have already started or ended.",
     rangeRulePriorityVerified:
-      "WhatsApp members can book any future time range in advance. The system will automatically sign you up for {count} half-hour slot(s).",
+      "WhatsApp members can book any future time range in advance.",
     rangeRulePriorityNeed:
       "WhatsApp members need to enter the correct invitation code first.",
     rangeRulePublicOk:
-      "Public entry can currently book this range. The system will automatically sign you up for {count} half-hour slot(s).",
+      "Public entry can currently book this range.",
     rangeRulePublicWait:
       "Public entry can only book slots within the next 72 hours.",
 
