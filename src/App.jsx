@@ -116,6 +116,7 @@ const translations = {
     endMustBeLater: "管理员生成时间段时，结束时间必须晚于开始时间。",
     dateAlreadyHasSlots:
       "这个日期已经有时间段了。为了避免重复，请先不要重复生成同一天。",
+    slotOverlapError: "这个日期里已有与所选时间重叠的时段，不能重复生成。",
     noSlotsGenerated: "没有生成任何时间段，请检查开始和结束时间。",
     generateFailed: "生成失败：{message}",
     generateSuccess: "已成功生成 {date} {start}-{end} 的半小时时段。",
@@ -232,6 +233,7 @@ const translations = {
       "When generating slots as admin, the end time must be later than the start time.",
     dateAlreadyHasSlots:
       "This date already has slots. To avoid duplicates, please do not generate the same day again.",
+    slotOverlapError: "There are already existing slots on this date that overlap with the selected time range.",
     noSlotsGenerated:
       "No slots were generated. Please check the start and end times.",
     generateFailed: "Generation failed: {message}",
@@ -1067,11 +1069,74 @@ export default function App() {
       return;
     }
 
-    const existingForDate = slots.filter((s) => s.date === adminDate);
-    if (existingForDate.length > 0) {
-      setMessage(t("dateAlreadyHasSlots"));
-      return;
-    }
+const generateSlots = async () => {
+  if (!adminUnlocked) {
+    setMessage(t("unlockAdminFirst"));
+    return;
+  }
+
+  if (!adminDate || !adminStart || !adminEnd) {
+    setMessage(t("fillAdminFields"));
+    return;
+  }
+
+  if (adminStart >= adminEnd) {
+    setMessage(t("endMustBeLater"));
+    return;
+  }
+
+  const newStartMinutes = timeToMinutes(adminStart);
+  const newEndMinutes = timeToMinutes(adminEnd);
+
+  const existingForDate = slots.filter((s) => s.date === adminDate);
+
+  const hasOverlap = existingForDate.some((slot) => {
+    const slotStartMinutes = timeToMinutes(slot.start_time);
+    const slotEndMinutes = timeToMinutes(slot.end_time);
+
+    return newStartMinutes < slotEndMinutes && newEndMinutes > slotStartMinutes;
+  });
+
+  if (hasOverlap) {
+    setMessage("这个日期里已有与所选时间重叠的时段，不能重复生成。");
+    return;
+  }
+
+  const inserts = [];
+  let current = new Date(`${adminDate}T${adminStart}:00`);
+  const end = new Date(`${adminDate}T${adminEnd}:00`);
+
+  while (current < end) {
+    const next = new Date(current);
+    next.setMinutes(next.getMinutes() + 30);
+    if (next > end) break;
+
+    inserts.push({
+      date: adminDate,
+      start_time: current.toTimeString().slice(0, 8),
+      end_time: next.toTimeString().slice(0, 8),
+      capacity: Number(adminCapacity),
+    });
+
+    current = next;
+  }
+
+  if (!inserts.length) {
+    setMessage(t("noSlotsGenerated"));
+    return;
+  }
+
+  const { error } = await supabase.from("slots").insert(inserts);
+  if (error) {
+    setMessage(t("generateFailed", { message: error.message }));
+    return;
+  }
+
+  setMessage(
+    `已成功生成 ${adminDate} ${adminStart}-${adminEnd} 的半小时时段。`
+  );
+  await fetchAll();
+};
 
     const inserts = [];
     let current = new Date(`${adminDate}T${adminStart}:00`);
