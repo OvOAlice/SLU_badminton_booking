@@ -295,6 +295,30 @@ function getDateTimes(slots, date) {
   };
 }
 
+function getValidEndTimes(slots, date, startTime) {
+  if (!date || !startTime) return [];
+
+  const daySlots = slots
+    .filter((s) => s.date === date)
+    .sort((a, b) => s.start_time.localeCompare(b.start_time));
+
+  const startSlot = daySlots.find((s) => s.start_time === startTime);
+  if (!startSlot) return [];
+
+  const validEndTimes = [];
+  let currentEnd = startSlot.end_time;
+  validEndTimes.push(currentEnd);
+
+  while (true) {
+    const nextSlot = daySlots.find((s) => s.start_time === currentEnd);
+    if (!nextSlot) break;
+    currentEnd = nextSlot.end_time;
+    validEndTimes.push(currentEnd);
+  }
+
+  return validEndTimes;
+}
+
 function sTime(slot) {
   return slot.start_time;
 }
@@ -827,10 +851,15 @@ export default function App() {
   }, []);
 
   const dates = useMemo(() => getUniqueDates(slots), [slots]);
-  const { startTimes, endTimes } = useMemo(
-    () => getDateTimes(slots, selectedDate),
-    [slots, selectedDate]
-  );
+  const { startTimes } = useMemo(
+  () => getDateTimes(slots, selectedDate),
+  [slots, selectedDate]
+);
+
+const endTimes = useMemo(
+  () => getValidEndTimes(slots, selectedDate, selectedStartTime),
+  [slots, selectedDate, selectedStartTime]
+);
 
   useEffect(() => {
     if (!selectedDate && dates.length) {
