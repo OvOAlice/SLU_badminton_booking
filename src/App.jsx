@@ -894,10 +894,17 @@ const endTimes = useMemo(
   }, [slots, selectedDate, selectedStartTime, selectedEndTime]);
 
   const selectedRangeIsValid = useMemo(() => {
-    if (!selectedDate || !selectedStartTime || !selectedEndTime) return false;
-    if (selectedStartTime >= selectedEndTime) return false;
-    return areContiguous(selectedRangeSlots, selectedStartTime, selectedEndTime);
-  }, [selectedDate, selectedStartTime, selectedEndTime, selectedRangeSlots]);
+  console.log("DEBUG range", {
+    selectedDate,
+    selectedStartTime,
+    selectedEndTime,
+    selectedRangeSlots,
+  });
+
+  if (!selectedDate || !selectedStartTime || !selectedEndTime) return false;
+  if (selectedStartTime >= selectedEndTime) return false;
+  return areContiguous(selectedRangeSlots, selectedStartTime, selectedEndTime);
+}, [selectedDate, selectedStartTime, selectedEndTime, selectedRangeSlots]);
 
   const rangeStatus = useMemo(() => {
     const result = {
