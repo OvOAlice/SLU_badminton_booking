@@ -66,12 +66,14 @@ const translations = {
     capacity: "每格人数",
     startTime: "开始时间",
     endTime: "结束时间",
-    generateSlots: "生成半小时 slots",
+    generateSlots: "生成/覆盖半小时 slots",
+    updateCapacityForDate: "更新当天人数上限",
+    cleanupPastSlots: "清理过期 slots",
 
     loading: "加载中…",
     noBookings: "还没有任何报名记录",
     noSlots:
-      "还没有任何时间段。你可以先在上面的管理员入口生成某一天的 slots。",
+      "还没有任何未来时间段。你可以先在上面的管理员入口生成某一天的 slots。",
 
     currentSelection: "当前选择",
     invalidCurrentRange: "当前时间范围无效",
@@ -97,7 +99,7 @@ const translations = {
     pastRangeCannotBook:
       "你选择的时间范围里，至少有一个时间段已经开始或已经结束，不能再报名。",
     public72Only:
-      "普通入口的报名仅在活动开始前72h内开放。WhatsApp群成员可以提前报名所有timeedit上已预约的时间段。",
+      "普通入口的报名仅在活动开始前72h内开放。WhatsApp群成员可以提前报名所有未来时间段。",
     alreadyBooked:
       "你选择的时间范围里，有至少一个半小时段已经报过了。",
     someSlotFull: "你选择的时间范围里，有至少一个半小时段已经满了。",
@@ -114,21 +116,31 @@ const translations = {
     unlockAdminFirst: "请先解锁管理员。",
     fillAdminFields: "管理员生成时间段时，请把日期、开始和结束时间填完整。",
     endMustBeLater: "管理员生成时间段时，结束时间必须晚于开始时间。",
-    dateAlreadyHasSlots:
-      "这个日期已经有时间段了。为了避免重复，请先不要重复生成同一天。",
-    slotOverlapError: "这个日期里已有与所选时间重叠的时段，不能重复生成。",
     noSlotsGenerated: "没有生成任何时间段，请检查开始和结束时间。",
     generateFailed: "生成失败：{message}",
-    generateSuccess: "已成功生成 {date} {start}-{end} 的半小时时段。",
+    generateSuccess:
+      "已处理 {date} {start}-{end} 的半小时时段：新增 {inserted} 个，覆盖 {updated} 个。",
+    generateNoChange: "该范围内所有 slots 已存在，且人数上限相同，无需修改。",
+    overlapConflict:
+      "这个日期里已有时间重叠但不完全相同的时段，不能生成。",
+    capacityTooSmallForExisting:
+      "无法覆盖 {date} {start}-{end}：当前已有 {booked} 人报名，新人数上限 {capacity} 太小。",
+
+    updateCapacityNeedFields: "请先选择日期并输入人数。",
+    updateCapacityNoSlots: "这一天还没有任何 slots。",
+    updateCapacityTooSmall: "当前已有报名人数超过这个上限，不能降低容量。",
+    updateCapacitySuccess: "已更新 {date} 的所有 slots 人数为 {capacity}。",
+
+    cleanupSuccess: "已清理 {count} 个过期 slots。",
+    cleanupNoPast: "当前没有需要清理的过期 slots。",
+    cleanupFailed: "清理失败：{message}",
 
     rangeRuleInvalid: "请选择合法的开始和结束时间。结束时间必须晚于开始时间。",
     rangeRulePast: "不能报名已经开始或已经结束的时间段。",
-    rangeRulePriorityVerified:
-      "WhatsApp群成员可提前报名任意未来时间段。",
+    rangeRulePriorityVerified: "WhatsApp群成员可提前报名任意未来时间段。",
     rangeRulePriorityNeed: "WhatsApp群成员需要先输入正确邀请码。",
-    rangeRulePublicOk:
-      "普通入口当前可以报名这个范围。",
-    rangeRulePublicWait: "普通入口的报名仅在活动开始前72h内开放。",
+    rangeRulePublicOk: "普通入口当前可以报名这个范围。",
+    rangeRulePublicWait: "普通入口的报名仅在活动开始前72小时内开放。",
 
     unnamed: "未命名",
   },
@@ -161,7 +173,7 @@ const translations = {
     invitationCodePlaceholder: "Enter invitation code",
     verify: "Verify",
     priorityVerified:
-      "invitation code verified. You can sign up for any future time range.",
+      "Invitation code verified. You can sign up for any future time range.",
     priorityNeedVerify:
       "WhatsApp members need to enter the correct invitation code first.",
 
@@ -177,12 +189,14 @@ const translations = {
     capacity: "Capacity per slot",
     startTime: "Start time",
     endTime: "End time",
-    generateSlots: "Generate half-hour slots",
+    generateSlots: "Generate / overwrite half-hour slots",
+    updateCapacityForDate: "Update capacity for this date",
+    cleanupPastSlots: "Clean past slots",
 
     loading: "Loading…",
     noBookings: "No sign-up records yet",
     noSlots:
-      "There are no time slots yet. You can generate slots for a date using the admin section above.",
+      "There are no future time slots yet. You can generate slots for a date using the admin section above.",
 
     currentSelection: "Current selection",
     invalidCurrentRange: "Current time range is invalid",
@@ -231,14 +245,28 @@ const translations = {
       "When generating slots as admin, please fill in the date, start time, and end time.",
     endMustBeLater:
       "When generating slots as admin, the end time must be later than the start time.",
-    dateAlreadyHasSlots:
-      "This date already has slots. To avoid duplicates, please do not generate the same day again.",
-    slotOverlapError: "There are already existing slots on this date that overlap with the selected time range.",
     noSlotsGenerated:
       "No slots were generated. Please check the start and end times.",
     generateFailed: "Generation failed: {message}",
     generateSuccess:
-      "Successfully generated half-hour slots for {date} {start}-{end}.",
+      "Processed {date} {start}-{end}: inserted {inserted} slot(s), updated {updated} slot(s).",
+    generateNoChange:
+      "All slots in this range already exist and already have the same capacity.",
+    overlapConflict:
+      "There are existing overlapping slots on this date that are not exact matches, so generation is blocked.",
+    capacityTooSmallForExisting:
+      "Cannot overwrite {date} {start}-{end}: there are already {booked} booking(s), but the new capacity {capacity} is too small.",
+
+    updateCapacityNeedFields: "Please choose a date and enter a capacity first.",
+    updateCapacityNoSlots: "There are no slots on this date yet.",
+    updateCapacityTooSmall:
+      "Some slots already have more bookings than this new capacity, so it cannot be reduced.",
+    updateCapacitySuccess:
+      "Updated all slots on {date} to capacity {capacity}.",
+
+    cleanupSuccess: "Cleaned up {count} past slot(s).",
+    cleanupNoPast: "There are no past slots to clean up.",
+    cleanupFailed: "Cleanup failed: {message}",
 
     rangeRuleInvalid:
       "Please select a valid start and end time. The end time must be later than the start time.",
@@ -267,21 +295,44 @@ function formatTime(value) {
   return String(value || "").slice(0, 5);
 }
 
+function normalizeDbTime(timeStr) {
+  const value = String(timeStr || "");
+  if (value.length >= 8) return value.slice(0, 8);
+  if (value.length === 5) return `${value}:00`;
+  return value;
+}
+
 function getUniqueDates(slots) {
   return [...new Set(slots.map((s) => s.date))].sort();
 }
 
 function getSlotStartDateTime(slot) {
-  return new Date(`${slot.date}T${slot.start_time}`);
+  return new Date(`${slot.date}T${normalizeDbTime(slot.start_time)}`);
+}
+
+function getSlotEndDateTime(slot) {
+  return new Date(`${slot.date}T${normalizeDbTime(slot.end_time)}`);
 }
 
 function isFutureSlot(slot) {
   return getSlotStartDateTime(slot).getTime() > Date.now();
 }
 
+function isVisibleSlot(slot) {
+  return getSlotEndDateTime(slot).getTime() > Date.now();
+}
+
 function isWithinNext72Hours(slot) {
   const diffMs = getSlotStartDateTime(slot).getTime() - Date.now();
   return diffMs > 0 && diffMs <= 72 * 60 * 60 * 1000;
+}
+
+function sTime(slot) {
+  return normalizeDbTime(slot.start_time);
+}
+
+function eTime(slot) {
+  return normalizeDbTime(slot.end_time);
 }
 
 function getDateTimes(slots, date) {
@@ -290,8 +341,8 @@ function getDateTimes(slots, date) {
     .sort((a, b) => sTime(a).localeCompare(sTime(b)));
 
   return {
-    startTimes: [...new Set(daySlots.map((s) => s.start_time))],
-    endTimes: [...new Set(daySlots.map((s) => s.end_time))],
+    startTimes: [...new Set(daySlots.map((s) => sTime(s)))],
+    endTimes: [...new Set(daySlots.map((s) => eTime(s)))],
   };
 }
 
@@ -300,27 +351,23 @@ function getValidEndTimes(slots, date, startTime) {
 
   const daySlots = slots
     .filter((s) => s.date === date)
-    .sort((a, b) => s.start_time.localeCompare(b.start_time));
+    .sort((a, b) => sTime(a).localeCompare(sTime(b)));
 
-  const startSlot = daySlots.find((s) => s.start_time === startTime);
+  const startSlot = daySlots.find((s) => sTime(s) === startTime);
   if (!startSlot) return [];
 
   const validEndTimes = [];
-  let currentEnd = startSlot.end_time;
+  let currentEnd = eTime(startSlot);
   validEndTimes.push(currentEnd);
 
   while (true) {
-    const nextSlot = daySlots.find((s) => s.start_time === currentEnd);
+    const nextSlot = daySlots.find((s) => sTime(s) === currentEnd);
     if (!nextSlot) break;
-    currentEnd = nextSlot.end_time;
+    currentEnd = eTime(nextSlot);
     validEndTimes.push(currentEnd);
   }
 
   return validEndTimes;
-}
-
-function sTime(slot) {
-  return slot.start_time;
 }
 
 function getSlotsInRange(slots, date, startTime, endTime) {
@@ -328,19 +375,19 @@ function getSlotsInRange(slots, date, startTime, endTime) {
     .filter(
       (s) =>
         s.date === date &&
-        s.start_time >= startTime &&
-        s.end_time <= endTime
+        sTime(s) >= startTime &&
+        eTime(s) <= endTime
     )
-    .sort((a, b) => a.start_time.localeCompare(b.start_time));
+    .sort((a, b) => sTime(a).localeCompare(sTime(b)));
 }
 
 function areContiguous(selectedSlots, startTime, endTime) {
   if (!selectedSlots.length) return false;
-  if (selectedSlots[0].start_time !== startTime) return false;
-  if (selectedSlots[selectedSlots.length - 1].end_time !== endTime) return false;
+  if (sTime(selectedSlots[0]) !== startTime) return false;
+  if (eTime(selectedSlots[selectedSlots.length - 1]) !== endTime) return false;
 
   for (let i = 0; i < selectedSlots.length - 1; i += 1) {
-    if (selectedSlots[i].end_time !== selectedSlots[i + 1].start_time) {
+    if (eTime(selectedSlots[i]) !== sTime(selectedSlots[i + 1])) {
       return false;
     }
   }
@@ -350,6 +397,36 @@ function areContiguous(selectedSlots, startTime, endTime) {
 function timeToMinutes(timeStr) {
   const [h, m] = String(timeStr).slice(0, 5).split(":").map(Number);
   return h * 60 + m;
+}
+
+function rangesOverlap(startA, endA, startB, endB) {
+  return (
+    timeToMinutes(startA) < timeToMinutes(endB) &&
+    timeToMinutes(endA) > timeToMinutes(startB)
+  );
+}
+
+function buildHalfHourSlots(date, startTime, endTime, capacity) {
+  const inserts = [];
+  let current = new Date(`${date}T${startTime}:00`);
+  const end = new Date(`${date}T${endTime}:00`);
+
+  while (current < end) {
+    const next = new Date(current);
+    next.setMinutes(next.getMinutes() + 30);
+    if (next > end) break;
+
+    inserts.push({
+      date,
+      start_time: current.toTimeString().slice(0, 8),
+      end_time: next.toTimeString().slice(0, 8),
+      capacity: Number(capacity),
+    });
+
+    current = next;
+  }
+
+  return inserts;
 }
 
 function mergeContinuousRanges(ranges) {
@@ -401,8 +478,8 @@ function buildTimelineSummary(slots, bookings, unnamedLabel) {
     if (!byDate[date][name]) byDate[date][name] = [];
 
     byDate[date][name].push({
-      start: formatTime(slot.start_time),
-      end: formatTime(slot.end_time),
+      start: formatTime(sTime(slot)),
+      end: formatTime(eTime(slot)),
     });
   }
 
@@ -539,12 +616,6 @@ function getStyles(isMobile, isTablet) {
       alignItems: "center",
       flexDirection: isMobile ? "column" : "row",
     },
-    rowWrapNoStack: {
-      display: "flex",
-      gap: 10,
-      flexWrap: "wrap",
-      alignItems: "center",
-    },
     entryPanel: {
       display: "grid",
       gap: 10,
@@ -623,6 +694,17 @@ function getStyles(isMobile, isTablet) {
       padding: isMobile ? "11px 14px" : "10px 14px",
       borderRadius: 10,
       cursor: "not-allowed",
+      fontSize: isMobile ? 14 : 14,
+      width: isMobile ? "100%" : "auto",
+      minHeight: 42,
+    },
+    dangerButton: {
+      border: "none",
+      background: "#dc2626",
+      color: "white",
+      padding: isMobile ? "11px 14px" : "10px 14px",
+      borderRadius: 10,
+      cursor: "pointer",
       fontSize: isMobile ? 14 : 14,
       width: isMobile ? "100%" : "auto",
       minHeight: 42,
@@ -850,19 +932,39 @@ export default function App() {
     fetchAll();
   }, []);
 
-  const dates = useMemo(() => getUniqueDates(slots), [slots]);
-  const { startTimes } = useMemo(
-  () => getDateTimes(slots, selectedDate),
-  [slots, selectedDate]
-);
+  const visibleSlots = useMemo(() => {
+    return slots.filter((slot) => isVisibleSlot(slot));
+  }, [slots]);
 
-const endTimes = useMemo(
-  () => getValidEndTimes(slots, selectedDate, selectedStartTime),
-  [slots, selectedDate, selectedStartTime]
-);
+  const visibleSlotIdSet = useMemo(() => {
+    return new Set(visibleSlots.map((slot) => slot.id));
+  }, [visibleSlots]);
+
+  const visibleBookings = useMemo(() => {
+    return bookings.filter((b) => visibleSlotIdSet.has(b.slot_id));
+  }, [bookings, visibleSlotIdSet]);
+
+  const dates = useMemo(() => getUniqueDates(visibleSlots), [visibleSlots]);
+
+  const { startTimes } = useMemo(
+    () => getDateTimes(visibleSlots, selectedDate),
+    [visibleSlots, selectedDate]
+  );
+
+  const endTimes = useMemo(
+    () => getValidEndTimes(visibleSlots, selectedDate, selectedStartTime),
+    [visibleSlots, selectedDate, selectedStartTime]
+  );
 
   useEffect(() => {
-    if (!selectedDate && dates.length) {
+    if (!dates.length) {
+      setSelectedDate("");
+      setSelectedStartTime("");
+      setSelectedEndTime("");
+      return;
+    }
+
+    if (!selectedDate || !dates.includes(selectedDate)) {
       setSelectedDate(dates[0]);
     }
   }, [dates, selectedDate]);
@@ -870,14 +972,26 @@ const endTimes = useMemo(
   useEffect(() => {
     if (!selectedDate) return;
 
-    if (startTimes.length && !startTimes.includes(selectedStartTime)) {
-      setSelectedStartTime(startTimes[0]);
+    if (startTimes.length) {
+      if (!selectedStartTime || !startTimes.includes(selectedStartTime)) {
+        setSelectedStartTime(startTimes[0]);
+      }
+    } else {
+      setSelectedStartTime("");
     }
+  }, [selectedDate, startTimes, selectedStartTime]);
 
-    if (endTimes.length && !endTimes.includes(selectedEndTime)) {
-      setSelectedEndTime(endTimes[endTimes.length - 1]);
+  useEffect(() => {
+    if (!selectedDate || !selectedStartTime) return;
+
+    if (endTimes.length) {
+      if (!selectedEndTime || !endTimes.includes(selectedEndTime)) {
+        setSelectedEndTime(endTimes[endTimes.length - 1]);
+      }
+    } else {
+      setSelectedEndTime("");
     }
-  }, [selectedDate, startTimes, endTimes, selectedStartTime, selectedEndTime]);
+  }, [selectedDate, selectedStartTime, endTimes, selectedEndTime]);
 
   const groupedBookings = useMemo(() => {
     const map = {};
@@ -890,21 +1004,19 @@ const endTimes = useMemo(
 
   const selectedRangeSlots = useMemo(() => {
     if (!selectedDate || !selectedStartTime || !selectedEndTime) return [];
-    return getSlotsInRange(slots, selectedDate, selectedStartTime, selectedEndTime);
-  }, [slots, selectedDate, selectedStartTime, selectedEndTime]);
+    return getSlotsInRange(
+      visibleSlots,
+      selectedDate,
+      selectedStartTime,
+      selectedEndTime
+    );
+  }, [visibleSlots, selectedDate, selectedStartTime, selectedEndTime]);
 
   const selectedRangeIsValid = useMemo(() => {
-  console.log("DEBUG range", {
-    selectedDate,
-    selectedStartTime,
-    selectedEndTime,
-    selectedRangeSlots,
-  });
-
-  if (!selectedDate || !selectedStartTime || !selectedEndTime) return false;
-  if (selectedStartTime >= selectedEndTime) return false;
-  return areContiguous(selectedRangeSlots, selectedStartTime, selectedEndTime);
-}, [selectedDate, selectedStartTime, selectedEndTime, selectedRangeSlots]);
+    if (!selectedDate || !selectedStartTime || !selectedEndTime) return false;
+    if (selectedStartTime >= selectedEndTime) return false;
+    return areContiguous(selectedRangeSlots, selectedStartTime, selectedEndTime);
+  }, [selectedDate, selectedStartTime, selectedEndTime, selectedRangeSlots]);
 
   const rangeStatus = useMemo(() => {
     const result = {
@@ -923,15 +1035,15 @@ const endTimes = useMemo(
     );
     result.full = selectedRangeSlots.some((slot) => {
       const slotBookings = groupedBookings[slot.id] || [];
-      return slotBookings.length >= slot.capacity;
+      return slotBookings.length >= Number(slot.capacity);
     });
 
     return result;
   }, [selectedRangeIsValid, selectedRangeSlots, groupedBookings]);
 
   const timelineSummary = useMemo(() => {
-    return buildTimelineSummary(slots, bookings, t("unnamed"));
-  }, [slots, bookings, language]);
+    return buildTimelineSummary(visibleSlots, visibleBookings, t("unnamed"));
+  }, [visibleSlots, visibleBookings, language]);
 
   const unlockAdmin = () => {
     if (!settings?.admin_password) {
@@ -967,6 +1079,7 @@ const endTimes = useMemo(
 
   const signUpRange = async () => {
     const cleanName = name.trim();
+
     if (!cleanName) {
       setMessage(t("needName"));
       return;
@@ -1000,7 +1113,7 @@ const endTimes = useMemo(
     const alreadyBookedAny = selectedRangeSlots.some((slot) => {
       const slotBookings = groupedBookings[slot.id] || [];
       return slotBookings.some(
-        (b) => b.name.trim().toLowerCase() === cleanName.toLowerCase()
+        (b) => normalizeName(b.name) === normalizeName(cleanName)
       );
     });
 
@@ -1022,6 +1135,7 @@ const endTimes = useMemo(
     }));
 
     const { error } = await supabase.from("bookings").insert(rows);
+
     if (error) {
       setMessage(t("signupFailed", { message: error.message }));
       return;
@@ -1035,11 +1149,13 @@ const endTimes = useMemo(
         pin: deletePin,
       })
     );
+
     await fetchAll();
   };
 
   const cancelRange = async () => {
     const cleanName = name.trim();
+
     if (!cleanName) {
       setMessage(t("needName"));
       return;
@@ -1059,7 +1175,7 @@ const endTimes = useMemo(
       .flatMap((slot) => groupedBookings[slot.id] || [])
       .filter(
         (b) =>
-          b.name.trim().toLowerCase() === cleanName.toLowerCase() &&
+          normalizeName(b.name) === normalizeName(cleanName) &&
           String(b.delete_pin || "") === deletePin
       )
       .map((b) => b.id);
@@ -1086,6 +1202,59 @@ const endTimes = useMemo(
         end: formatTime(selectedEndTime),
       })
     );
+
+    await fetchAll();
+  };
+
+  const updateCapacityForDate = async () => {
+    if (!adminUnlocked) {
+      setMessage(t("unlockAdminFirst"));
+      return;
+    }
+
+    if (!adminDate || !adminCapacity) {
+      setMessage(t("updateCapacityNeedFields"));
+      return;
+    }
+
+    const slotsForDate = slots.filter((s) => s.date === adminDate);
+
+    if (!slotsForDate.length) {
+      setMessage(t("updateCapacityNoSlots"));
+      return;
+    }
+
+    const newCapacity = Number(adminCapacity);
+
+    const hasOverLimit = slotsForDate.some((slot) => {
+      const count = (groupedBookings[slot.id] || []).length;
+      return count > newCapacity;
+    });
+
+    if (hasOverLimit) {
+      setMessage(t("updateCapacityTooSmall"));
+      return;
+    }
+
+    const ids = slotsForDate.map((s) => s.id);
+
+    const { error } = await supabase
+      .from("slots")
+      .update({ capacity: newCapacity })
+      .in("id", ids);
+
+    if (error) {
+      setMessage(`更新失败：${error.message}`);
+      return;
+    }
+
+    setMessage(
+      t("updateCapacitySuccess", {
+        date: adminDate,
+        capacity: newCapacity,
+      })
+    );
+
     await fetchAll();
   };
 
@@ -1105,131 +1274,106 @@ const endTimes = useMemo(
       return;
     }
 
-const updateCapacityForDate = async () => {
-  if (!adminUnlocked) {
-    setMessage(t("unlockAdminFirst"));
-    return;
-  }
+    const requestedSlots = buildHalfHourSlots(
+      adminDate,
+      adminStart,
+      adminEnd,
+      adminCapacity
+    );
 
-  if (!adminDate || !adminCapacity) {
-    setMessage("请先选择日期并输入人数。");
-    return;
-  }
-
-  const slotsForDate = slots.filter((s) => s.date === adminDate);
-
-  if (!slotsForDate.length) {
-    setMessage("这一天还没有任何 slots。");
-    return;
-  }
-
-  // ❗ 检查是否有slot人数已经超过新capacity（防止降容量）
-  const hasOverLimit = slotsForDate.some((slot) => {
-    const count = (groupedBookings[slot.id] || []).length;
-    return count > Number(adminCapacity);
-  });
-
-  if (hasOverLimit) {
-    setMessage("当前已有报名人数超过这个上限，不能降低容量。");
-    return;
-  }
-
-  const ids = slotsForDate.map((s) => s.id);
-
-  const { error } = await supabase
-    .from("slots")
-    .update({ capacity: Number(adminCapacity) })
-    .in("id", ids);
-
-  if (error) {
-    setMessage(`更新失败：${error.message}`);
-    return;
-  }
-
-  setMessage(`已更新 ${adminDate} 的所有 slots 人数为 ${adminCapacity}`);
-  await fetchAll();
-};
-
-  const newStartMinutes = timeToMinutes(adminStart);
-  const newEndMinutes = timeToMinutes(adminEnd);
-
-  const existingForDate = slots.filter((s) => s.date === adminDate);
-
-  const hasOverlap = existingForDate.some((slot) => {
-    const slotStartMinutes = timeToMinutes(slot.start_time);
-    const slotEndMinutes = timeToMinutes(slot.end_time);
-
-    return newStartMinutes < slotEndMinutes && newEndMinutes > slotStartMinutes;
-  });
-
-  if (hasOverlap) {
-    setMessage("这个日期里已有与所选时间重叠的时段，不能重复生成。");
-    return;
-  }
-
-  const inserts = [];
-  let current = new Date(`${adminDate}T${adminStart}:00`);
-  const end = new Date(`${adminDate}T${adminEnd}:00`);
-
-  while (current < end) {
-    const next = new Date(current);
-    next.setMinutes(next.getMinutes() + 30);
-    if (next > end) break;
-
-    inserts.push({
-      date: adminDate,
-      start_time: current.toTimeString().slice(0, 8),
-      end_time: next.toTimeString().slice(0, 8),
-      capacity: Number(adminCapacity),
-    });
-
-    current = next;
-  }
-
-  if (!inserts.length) {
-    setMessage(t("noSlotsGenerated"));
-    return;
-  }
-
-  const { error } = await supabase.from("slots").insert(inserts);
-  if (error) {
-    setMessage(t("generateFailed", { message: error.message }));
-    return;
-  }
-
-  setMessage(
-    `已成功生成 ${adminDate} ${adminStart}-${adminEnd} 的半小时时段。`
-  );
-  await fetchAll();
-};
-
-    const inserts = [];
-    let current = new Date(`${adminDate}T${adminStart}:00`);
-    const end = new Date(`${adminDate}T${adminEnd}:00`);
-
-    while (current < end) {
-      const next = new Date(current);
-      next.setMinutes(next.getMinutes() + 30);
-      if (next > end) break;
-
-      inserts.push({
-        date: adminDate,
-        start_time: current.toTimeString().slice(0, 8),
-        end_time: next.toTimeString().slice(0, 8),
-        capacity: Number(adminCapacity),
-      });
-
-      current = next;
-    }
-
-    if (!inserts.length) {
+    if (!requestedSlots.length) {
       setMessage(t("noSlotsGenerated"));
       return;
     }
 
-    const { error } = await supabase.from("slots").insert(inserts);
-    if (error) {
-      setMessage(t("generateFailed", { message: error.message }));
+    const existingForDate = slots.filter((s) => s.date === adminDate);
+
+    const hasNonExactOverlap = requestedSlots.some((newSlot) =>
+      existingForDate.some((oldSlot) => {
+        const exactSame =
+          sTime(oldSlot) === sTime(newSlot) &&
+          eTime(oldSlot) === eTime(newSlot);
+
+        if (exactSame) return false;
+
+        return rangesOverlap(
+          sTime(newSlot),
+          eTime(newSlot),
+          sTime(oldSlot),
+          eTime(oldSlot)
+        );
+      })
+    );
+
+    if (hasNonExactOverlap) {
+      setMessage(t("overlapConflict"));
+      return;
+    }
+
+    const toInsert = [];
+    const toUpdate = [];
+    const newCapacity = Number(adminCapacity);
+
+    for (const newSlot of requestedSlots) {
+      const existingSlot = existingForDate.find(
+        (s) =>
+          sTime(s) === sTime(newSlot) &&
+          eTime(s) === eTime(newSlot)
+      );
+
+      if (existingSlot) {
+        const currentBookings = (groupedBookings[existingSlot.id] || []).length;
+
+        if (newCapacity < currentBookings) {
+          setMessage(
+            t("capacityTooSmallForExisting", {
+              date: adminDate,
+              start: formatTime(sTime(existingSlot)),
+              end: formatTime(eTime(existingSlot)),
+              booked: currentBookings,
+              capacity: newCapacity,
+            })
+          );
+          return;
+        }
+
+        if (Number(existingSlot.capacity) !== newCapacity) {
+          toUpdate.push({
+            id: existingSlot.id,
+            capacity: newCapacity,
+          });
+        }
+      } else {
+        toInsert.push({
+          ...newSlot,
+          capacity: newCapacity,
+        });
+      }
+    }
+
+    for (const row of toUpdate) {
+      const { error } = await supabase
+        .from("slots")
+        .update({ capacity: row.capacity })
+        .eq("id", row.id);
+
+      if (error) {
+        setMessage(t("generateFailed", { message: error.message }));
+        return;
+      }
+    }
+
+    if (toInsert.length) {
+      const { error } = await supabase.from("slots").insert(toInsert);
+
+      if (error) {
+        setMessage(t("generateFailed", { message: error.message }));
+        return;
+      }
+    }
+
+    if (!toInsert.length && !toUpdate.length) {
+      setMessage(t("generateNoChange"));
       return;
     }
 
@@ -1238,8 +1382,56 @@ const updateCapacityForDate = async () => {
         date: adminDate,
         start: adminStart,
         end: adminEnd,
+        inserted: toInsert.length,
+        updated: toUpdate.length,
       })
     );
+
+    await fetchAll();
+  };
+
+  const cleanupPastSlots = async () => {
+    if (!adminUnlocked) {
+      setMessage(t("unlockAdminFirst"));
+      return;
+    }
+
+    const pastSlots = slots.filter((slot) => !isVisibleSlot(slot));
+
+    if (!pastSlots.length) {
+      setMessage(t("cleanupNoPast"));
+      return;
+    }
+
+    const pastSlotIds = pastSlots.map((slot) => slot.id);
+
+    const bookingIdsToDelete = bookings
+      .filter((b) => pastSlotIds.includes(b.slot_id))
+      .map((b) => b.id);
+
+    if (bookingIdsToDelete.length) {
+      const { error: bookingDeleteError } = await supabase
+        .from("bookings")
+        .delete()
+        .in("id", bookingIdsToDelete);
+
+      if (bookingDeleteError) {
+        setMessage(t("cleanupFailed", { message: bookingDeleteError.message }));
+        return;
+      }
+    }
+
+    const { error: slotDeleteError } = await supabase
+      .from("slots")
+      .delete()
+      .in("id", pastSlotIds);
+
+    if (slotDeleteError) {
+      setMessage(t("cleanupFailed", { message: slotDeleteError.message }));
+      return;
+    }
+
+    setMessage(t("cleanupSuccess", { count: pastSlotIds.length }));
     await fetchAll();
   };
 
@@ -1252,11 +1444,11 @@ const updateCapacityForDate = async () => {
     }
     if (entryMode === "priority") {
       return priorityUnlocked
-        ? t("rangeRulePriorityVerified", { count: rangeStatus.slots })
+        ? t("rangeRulePriorityVerified")
         : t("rangeRulePriorityNeed");
     }
     return rangeStatus.publicEligible
-      ? t("rangeRulePublicOk", { count: rangeStatus.slots })
+      ? t("rangeRulePublicOk")
       : t("rangeRulePublicWait");
   })();
 
@@ -1383,26 +1575,24 @@ const updateCapacityForDate = async () => {
           ) : (
             <div style={styles.entryPanel}>
               {!adminUnlocked ? (
-                <>
-                  <div style={styles.adminUnlockRow}>
-                    <div style={{ ...styles.inputBlock, flex: 1, width: isMobile ? "100%" : "auto" }}>
-                      <label style={styles.label}>{t("adminPassword")}</label>
-                      <input
-                        type="password"
-                        value={adminPasswordInput}
-                        onChange={(e) => setAdminPasswordInput(e.target.value)}
-                        style={styles.input}
-                        placeholder={t("adminPasswordPlaceholder")}
-                      />
-                    </div>
-
-                    <div style={styles.adminButtonWrap}>
-                      <button style={styles.primaryButton} onClick={unlockAdmin}>
-                        {t("unlockAdmin")}
-                      </button>
-                    </div>
+                <div style={styles.adminUnlockRow}>
+                  <div style={{ ...styles.inputBlock, flex: 1, width: isMobile ? "100%" : "auto" }}>
+                    <label style={styles.label}>{t("adminPassword")}</label>
+                    <input
+                      type="password"
+                      value={adminPasswordInput}
+                      onChange={(e) => setAdminPasswordInput(e.target.value)}
+                      style={styles.input}
+                      placeholder={t("adminPasswordPlaceholder")}
+                    />
                   </div>
-                </>
+
+                  <div style={styles.adminButtonWrap}>
+                    <button style={styles.primaryButton} onClick={unlockAdmin}>
+                      {t("unlockAdmin")}
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <>
                   <div style={styles.hint}>{t("adminUnlockedHint")}</div>
@@ -1425,7 +1615,11 @@ const updateCapacityForDate = async () => {
                         type="number"
                         min="1"
                         value={adminCapacity}
-                        onChange={(e) => setAdminCapacity(e.target.value)}
+                        onChange={(e) =>
+                          setAdminCapacity(
+                            e.target.value === "" ? "" : Number(e.target.value)
+                          )
+                        }
                       />
                     </div>
 
@@ -1450,20 +1644,25 @@ const updateCapacityForDate = async () => {
                     </div>
                   </div>
 
-                  <div style={{ marginTop: 12 }}>
-  <button style={styles.primaryButton} onClick={generateSlots}>
-    {t("generateSlots")}
-  </button>
-</div>
+                  <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button style={styles.primaryButton} onClick={generateSlots}>
+                      {t("generateSlots")}
+                    </button>
 
-<div style={{ marginTop: 8 }}>
-  <button
-    style={styles.secondaryButton}
-    onClick={updateCapacityForDate}
-  >
-    更新当天人数上限
-  </button>
-</div>
+                    <button
+                      style={styles.secondaryButton}
+                      onClick={updateCapacityForDate}
+                    >
+                      {t("updateCapacityForDate")}
+                    </button>
+
+                    <button
+                      style={styles.dangerButton}
+                      onClick={cleanupPastSlots}
+                    >
+                      {t("cleanupPastSlots")}
+                    </button>
+                  </div>
                 </>
               )}
             </div>
