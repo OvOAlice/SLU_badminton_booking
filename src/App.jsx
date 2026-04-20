@@ -302,6 +302,14 @@ function normalizeDbTime(timeStr) {
   return value;
 }
 
+function normalizeTimeKey(timeStr) {
+  return String(timeStr || "").slice(0, 5);
+}
+
+function slotKey(date, start, end) {
+  return `${date}|${normalizeTimeKey(start)}|${normalizeTimeKey(end)}`;
+}
+
 function getUniqueDates(slots) {
   return [...new Set(slots.map((s) => s.date))].sort();
 }
@@ -944,6 +952,15 @@ export default function App() {
     return bookings.filter((b) => visibleSlotIdSet.has(b.slot_id));
   }, [bookings, visibleSlotIdSet]);
 
+  const groupedBookings = useMemo(() => {
+    const map = {};
+    for (const booking of bookings) {
+      if (!map[booking.slot_id]) map[booking.slot_id] = [];
+      map[booking.slot_id].push(booking);
+    }
+    return map;
+  }, [bookings]);
+
   const dates = useMemo(() => getUniqueDates(visibleSlots), [visibleSlots]);
 
   const { startTimes } = useMemo(
@@ -992,15 +1009,6 @@ export default function App() {
       setSelectedEndTime("");
     }
   }, [selectedDate, selectedStartTime, endTimes, selectedEndTime]);
-
-  const groupedBookings = useMemo(() => {
-    const map = {};
-    for (const booking of bookings) {
-      if (!map[booking.slot_id]) map[booking.slot_id] = [];
-      map[booking.slot_id].push(booking);
-    }
-    return map;
-  }, [bookings]);
 
   const selectedRangeSlots = useMemo(() => {
     if (!selectedDate || !selectedStartTime || !selectedEndTime) return [];
@@ -1286,24 +1294,42 @@ export default function App() {
       return;
     }
 
-    const existingForDate = slots.filter((s) => s.date === adminDate);
+    const { data: existingForDate, error: fetchError } = await supabase
+      .from("slots")
+      .select("*")
+      .eq("date", adminDate)
+      .order("start_time", { ascending: true });
 
-    const hasNonExactOverlap = requestedSlots.some((newSlot) =>
-      existingForDate.some((oldSlot) => {
-        const exactSame =
-          sTime(oldSlot) === sTime(newSlot) &&
-          eTime(oldSlot) === eTime(newSlot);
+    if (fetchError) {
+      setMessage(t("generateFailed", { message: fetchError.message }));
+      return;
+    }
 
+    const existingSlots = existingForDate || [];
+    const newCapacity = Number(adminCapacity);
+
+    const existingMap = new Map();
+    for (const slot of existingSlots) {
+      const key = slotKey(slot.date, slot.start_time, slot.end_time);
+      if (!existingMap.has(key)) {
+        existingMap.set(key, slot);
+      }
+    }
+
+    const hasNonExactOverlap = requestedSlots.some((newSlot) => {
+      const newStart = normalizeTimeKey(newSlot.start_time);
+      const newEnd = normalizeTimeKey(newSlot.end_time);
+
+      return existingSlots.some((oldSlot) => {
+        const oldStart = normalizeTimeKey(oldSlot.start_time);
+        const oldEnd = normalizeTimeKey(oldSlot.end_time);
+
+        const exactSame = oldStart === newStart && oldEnd === newEnd;
         if (exactSame) return false;
 
-        return rangesOverlap(
-          sTime(newSlot),
-          eTime(newSlot),
-          sTime(oldSlot),
-          eTime(oldSlot)
-        );
-      })
-    );
+        return rangesOverlap(newStart, newEnd, oldStart, oldEnd);
+      });
+    });
 
     if (hasNonExactOverlap) {
       setMessage(t("overlapConflict"));
@@ -1312,14 +1338,10 @@ export default function App() {
 
     const toInsert = [];
     const toUpdate = [];
-    const newCapacity = Number(adminCapacity);
 
     for (const newSlot of requestedSlots) {
-      const existingSlot = existingForDate.find(
-        (s) =>
-          sTime(s) === sTime(newSlot) &&
-          eTime(s) === eTime(newSlot)
-      );
+      const key = slotKey(adminDate, newSlot.start_time, newSlot.end_time);
+      const existingSlot = existingMap.get(key);
 
       if (existingSlot) {
         const currentBookings = (groupedBookings[existingSlot.id] || []).length;
@@ -1328,8 +1350,8 @@ export default function App() {
           setMessage(
             t("capacityTooSmallForExisting", {
               date: adminDate,
-              start: formatTime(sTime(existingSlot)),
-              end: formatTime(eTime(existingSlot)),
+              start: normalizeTimeKey(existingSlot.start_time),
+              end: normalizeTimeKey(existingSlot.end_time),
               booked: currentBookings,
               capacity: newCapacity,
             })
@@ -1345,7 +1367,9 @@ export default function App() {
         }
       } else {
         toInsert.push({
-          ...newSlot,
+          date: adminDate,
+          start_time: `${normalizeTimeKey(newSlot.start_time)}:00`,
+          end_time: `${normalizeTimeKey(newSlot.end_time)}:00`,
           capacity: newCapacity,
         });
       }
