@@ -1069,21 +1069,50 @@ export default function App() {
       return;
     }
 
-const generateSlots = async () => {
+const updateCapacityForDate = async () => {
   if (!adminUnlocked) {
     setMessage(t("unlockAdminFirst"));
     return;
   }
 
-  if (!adminDate || !adminStart || !adminEnd) {
-    setMessage(t("fillAdminFields"));
+  if (!adminDate || !adminCapacity) {
+    setMessage("请先选择日期并输入人数。");
     return;
   }
 
-  if (adminStart >= adminEnd) {
-    setMessage(t("endMustBeLater"));
+  const slotsForDate = slots.filter((s) => s.date === adminDate);
+
+  if (!slotsForDate.length) {
+    setMessage("这一天还没有任何 slots。");
     return;
   }
+
+  // ❗ 检查是否有slot人数已经超过新capacity（防止降容量）
+  const hasOverLimit = slotsForDate.some((slot) => {
+    const count = (groupedBookings[slot.id] || []).length;
+    return count > Number(adminCapacity);
+  });
+
+  if (hasOverLimit) {
+    setMessage("当前已有报名人数超过这个上限，不能降低容量。");
+    return;
+  }
+
+  const ids = slotsForDate.map((s) => s.id);
+
+  const { error } = await supabase
+    .from("slots")
+    .update({ capacity: Number(adminCapacity) })
+    .in("id", ids);
+
+  if (error) {
+    setMessage(`更新失败：${error.message}`);
+    return;
+  }
+
+  setMessage(`已更新 ${adminDate} 的所有 slots 人数为 ${adminCapacity}`);
+  await fetchAll();
+};
 
   const newStartMinutes = timeToMinutes(adminStart);
   const newEndMinutes = timeToMinutes(adminEnd);
@@ -1386,10 +1415,19 @@ const generateSlots = async () => {
                   </div>
 
                   <div style={{ marginTop: 12 }}>
-                    <button style={styles.primaryButton} onClick={generateSlots}>
-                      {t("generateSlots")}
-                    </button>
-                  </div>
+  <button style={styles.primaryButton} onClick={generateSlots}>
+    {t("generateSlots")}
+  </button>
+</div>
+
+<div style={{ marginTop: 8 }}>
+  <button
+    style={styles.secondaryButton}
+    onClick={updateCapacityForDate}
+  >
+    更新当天人数上限
+  </button>
+</div>
                 </>
               )}
             </div>
