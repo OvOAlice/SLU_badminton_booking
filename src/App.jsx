@@ -907,22 +907,84 @@ export default function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const fetchAll = async () => {
-    setLoading(true);
-    setMessage("");
+  // const fetchAll = async () => {
+  //   setLoading(true);
+  //   setMessage("");
 
-    const [slotRes, bookingRes, settingsRes] = await Promise.all([
-      supabase
-        .from("slots")
-        .select("*")
-        .order("date", { ascending: true })
-        .order("start_time", { ascending: true }),
-      supabase
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: true }),
-      supabase.from("settings").select("*").eq("id", 1).single(),
-    ]);
+  //   const [slotRes, bookingRes, settingsRes] = await Promise.all([
+  //     supabase
+  //       .from("slots")
+  //       .select("*")
+  //       .order("date", { ascending: true })
+  //       .order("start_time", { ascending: true }),
+  //     supabase
+  //       .from("bookings")
+  //       .select("*")
+  //       .order("created_at", { ascending: true }),
+  //     supabase.from("settings").select("*").eq("id", 1).single(),
+  //   ]);
+
+    
+const fetchAll = async () => {
+  setLoading(true);
+
+  // 分页读取，避免 Supabase 的 1000 条记录限制
+  const fetchAllRows = async (table, orderColumns) => {
+    const pageSize = 500;
+    let allRows = [];
+    let from = 0;
+
+    while (true) {
+      let query = supabase.from(table).select("*");
+
+      for (const column of orderColumns) {
+        query = query.order(column, { ascending: true });
+      }
+
+      const { data, error } = await query.range(
+        from,
+        from + pageSize - 1
+      );
+
+      if (error) {
+        return { data: null, error };
+      }
+
+      const rows = data || [];
+      allRows = [...allRows, ...rows];
+
+      if (rows.length < pageSize) break;
+
+      from += pageSize;
+    }
+
+    return { data: allRows, error: null };
+  };
+
+  const [slotRes, bookingRes, settingsRes] = await Promise.all([
+    fetchAllRows("slots", ["date", "start_time", "id"]),
+    fetchAllRows("bookings", ["created_at", "id"]),
+    supabase.from("settings").select("*").eq("id", 1).single(),
+  ]);
+
+  if (slotRes.error || bookingRes.error || settingsRes.error) {
+    console.error("Database error:", {
+      slots: slotRes.error,
+      bookings: bookingRes.error,
+      settings: settingsRes.error,
+    });
+
+    setMessage(t("dbReadError"));
+    setLoading(false);
+    return;
+  }
+
+  setSlots(slotRes.data || []);
+  setBookings(bookingRes.data || []);
+  setSettings(settingsRes.data || null);
+  setLoading(false);
+};
+
 
     if (slotRes.error || bookingRes.error || settingsRes.error) {
       setMessage(t("dbReadError"));
