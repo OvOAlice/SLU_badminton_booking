@@ -985,19 +985,6 @@ const fetchAll = async () => {
   setLoading(false);
 };
 
-
-    if (slotRes.error || bookingRes.error || settingsRes.error) {
-      setMessage(t("dbReadError"));
-      setLoading(false);
-      return;
-    }
-
-    setSlots(slotRes.data || []);
-    setBookings(bookingRes.data || []);
-    setSettings(settingsRes.data || null);
-    setLoading(false);
-  };
-
   useEffect(() => {
     fetchAll();
   }, []);
